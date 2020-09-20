@@ -144,7 +144,7 @@ PRODUCT_PACKAGES += \
     vendor.oppo.hardware.biometrics.fingerprint@2.1
 
 PRODUCT_COPY_FILES += \
-    vendor/xtended/config/permissions/vendor.lineage.biometrics.fingerprint.inscreen.xml:vendor/etc/permissions/vendor.lineage.biometrics.fingerprint.inscreen.xml
+    vendor/rr/config/permissions/vendor.lineage.biometrics.fingerprint.inscreen.xml:vendor/etc/permissions/vendor.lineage.biometrics.fingerprint.inscreen.xml
 
 # FOD animations
 EXTRA_FOD_ANIMATIONS := true
@@ -246,7 +246,7 @@ PRODUCT_PACKAGES += \
 DEVICE_PACKAGE_OVERLAYS += \
     $(LOCAL_PATH)/overlay-lineage \
     $(LOCAL_PATH)/overlay \
-    $(LOCAL_PATH)/overlay-xtended
+    $(LOCAL_PATH)/overlay-rr
 
 PRODUCT_ENFORCE_RRO_TARGETS := *
 
