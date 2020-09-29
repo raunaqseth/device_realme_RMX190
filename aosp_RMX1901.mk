@@ -3,6 +3,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+# Inherit some common PixelExperience stuff.
+TARGET_GAPPS_ARCH := arm64
+TARGET_INCLUDE_STOCK_ARCORE := true
+TARGET_SUPPORTS_GOOGLE_RECORDER := true
 TARGET_BOOT_ANIMATION_RES := 2280
 
 # Inherit from RMX1901 device
