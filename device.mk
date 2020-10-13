@@ -385,6 +385,8 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_BOOT_JARS += \
     telephony-ext
+    
+BUILD_RR_WALLPAPERS:= true
 
 # TextClassifier
 PRODUCT_PACKAGES += \
