@@ -20,7 +20,7 @@ PRODUCT_NAME := rr_RMX1901
 PRODUCT_MODEL := Realme X
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
-    PRIVATE_BUILD_DESC="redfin-user 11 RQ2A.210505.003-7255357 release-keys" \
+    PRIVATE_BUILD_DESC="redfin-user 11 RQ3A.210805.001.A1 7474174 release-keys" \
     PRODUCT_NAME="RMX1901"
 
 # Set BUILD_FINGERPRINT variable to be picked up by both system and vendor build.prop
