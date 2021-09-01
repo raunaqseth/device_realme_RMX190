@@ -28,18 +28,18 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
-import android.os.Handler;
 
 public class InfraredSensor implements SensorEventListener {
     private static final boolean DEBUG = false;
     private static final String TAG = "InfraredSensor";
-    private static final int SENSORID = 33171005; //stk_st2x2x
+    private static final int SENSORID = 33171005; //stk_st2x2x Wakeup
 
     private static final String PS_STATUS = "/proc/touchpanel/fd_enable";
     private static final String PS_MASK = "/proc/touchpanel/prox_mask";
 
     // Store last status
     private static boolean sensorAlive = false;
+    private static boolean flag = false;
 
     private Context mContext;
     private SensorManager mSensorManager;
@@ -56,14 +56,25 @@ public class InfraredSensor implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         /* if we are here this means sensor live and is being used */
         sensorAlive = true;
-        if (event.values[0] == 0.0f) {
+        if (event.values[0] == 0) {
             /* We don't need to do anything since the sensor is near */
-            if (DEBUG) Log.d(TAG, "Exiting since near the sensor");    
+            if (DEBUG) Log.d(TAG, "Near detected, Sending same in 50ms");
+
+            /*
+             * Sensor reports change very often and it gets written to kernel node
+             * where input sync+report takes place in realtime with a mutex lock on data
+             * the stock sensor hal is supposed to poll & notify every change in satate
+             * which becomes messy as we link these events (Infra Proximity to tp Proximity)
+             * add a flag to handle this and return until a total event flip is observed
+             * before reporting a near event again
+             */
+            if (flag) return;
+
+            sendNear();
             return;
         }
         /* Let's do stuff ? */
-        if (DEBUG) Log.d(TAG, "Sending proximity far event in 150ms");
-        (new Handler()).postDelayed(this::sendFar, 150);
+        sendFar();
     }
 
     @Override
@@ -75,7 +86,8 @@ public class InfraredSensor implements SensorEventListener {
         if (FileHelper.getFileValueAsBoolean(PS_STATUS, false)) {
             if (DEBUG) Log.d(TAG, "Enabling QTI Proximity Sensor fd_enable was 1");
             sensorAlive = true;
-            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            flag = false; // Allow reporting near for initial case
+            mSensorManager.registerListener(this, mSensor, 50000);
         } else {
             if (DEBUG) Log.d(TAG, "Not a touchpanel proximity event");
             return;
@@ -86,6 +98,7 @@ public class InfraredSensor implements SensorEventListener {
         if(sensorAlive == true) {
             if (DEBUG) Log.d(TAG, "Disabling QTI Proximity");
             sensorAlive = false;
+            flag = true;
             mSensorManager.unregisterListener(this, mSensor);
         } else {
             if (DEBUG) Log.d(TAG, "Sensor wasn't registered no need of killing");
@@ -96,6 +109,14 @@ public class InfraredSensor implements SensorEventListener {
     /* Set proximity status as far */
    void sendFar() {
        if (DEBUG) Log.d(TAG, "Sent far event to Proximity mask node");
+       flag = false; // Disable spam control flag
        FileHelper.writeValue(PS_MASK, "1");
    }
+
+   /* Set proximity status as near */
+   void sendNear() {
+       if (DEBUG) Log.d(TAG, "Sent near event to proximity mask node");
+       flag = true; // Enable spam control flag
+       FileHelper.writeValue(PS_MASK, "0");
+    }
 }
